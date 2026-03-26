@@ -1,1 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stripe Test</title>
+  <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
 
+  <h2>Pay $10</h2>
+  <button id="checkout-button">Pay</button>
+
+  <script>
+    // ✅ Use your REAL public key from Stripe dashboard
+    const stripe = Stripe("pk_test_XXXXXXXX");
+
+    // ✅ Automatically detect backend URL (works on Render)
+    const BACKEND_URL = window.location.origin;
+
+    document.getElementById("checkout-button").addEventListener("click", async () => {
+      try {
+        const response = await fetch(`${BACKEND_URL}/create-checkout-session`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+
+        const session = await response.json();
+
+        if (!session.id) {
+          throw new Error("No session ID returned");
+        }
+
+        const result = await stripe.redirectToCheckout({
+          sessionId: session.id,
+        });
+
+        if (result.error) {
+          alert(result.error.message);
+        }
+
+      } catch (err) {
+        console.error(err);
+        alert("Payment failed. Check console.");
+      }
+    });
+  </script>
+
+</body>
+</html>
