@@ -6,7 +6,7 @@ import os
 app = Flask(__name__)
 
 # ✅ Allow your frontend domain for CORS
-CORS(app, origins=["https://strip-test.onrender.com"])
+CORS(app, origins=[os.getenv("FRONTEND_URL")])
 
 # ✅ Stripe secret key (backend only)
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
@@ -40,9 +40,7 @@ def create_checkout_session():
             success_url=f"{YOUR_DOMAIN}/success.html",
             cancel_url=f"{YOUR_DOMAIN}/cancel.html",
         )
-
         return jsonify({"id": session.id})
-
     except Exception as e:
         return jsonify(error=str(e)), 400
 
@@ -53,6 +51,5 @@ def home():
 
 
 if __name__ == "__main__":
-    # ✅ Use $PORT for Render deployment
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
