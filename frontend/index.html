@@ -11,10 +11,10 @@
 
   <script>
     // ✅ Use your REAL public key from Stripe dashboard
-    const stripe = Stripe("pk_test_XXXXXXXX");
+    const stripe = Stripe("pk_test_51SD3UEEQpGz4ZZzjDDoF3mRSySCy05xOCClulGiaJaDUOHEQX7n54u6V0jqOhPBB7I0yTvRbybXKZmvJd70LIhIA00UUB8Pcvv");
 
     // ✅ Automatically detect backend URL (works on Render)
-    const BACKEND_URL = window.location.origin;
+    const BACKEND_URL = "https://goober-ko72.onrender.com";
 
     document.getElementById("checkout-button").addEventListener("click", async () => {
       try {
