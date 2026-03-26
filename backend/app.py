@@ -5,11 +5,24 @@ import os
 
 app = Flask(__name__)
 
+# ✅ Allow your frontend domain for CORS
 CORS(app, origins=["https://strip-test.onrender.com"])
+
+# ✅ Stripe secret key (backend only)
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
-YOUR_DOMAIN = os.getenv("DOMAIN")  # 👈 important
+# ✅ Backend domain used for Stripe success/cancel URLs
+YOUR_DOMAIN = os.getenv("DOMAIN")
 
+
+# 🔹 Endpoint to return Stripe public key to frontend
+@app.route("/config", methods=["GET"])
+def get_config():
+    public_key = os.getenv("STRIPE_PUBLIC_KEY")
+    return jsonify({"publicKey": public_key})
+
+
+# 🔹 Endpoint to create a Stripe checkout session
 @app.route("/create-checkout-session", methods=["POST"])
 def create_checkout_session():
     try:
@@ -18,10 +31,8 @@ def create_checkout_session():
             line_items=[{
                 "price_data": {
                     "currency": "usd",
-                    "product_data": {
-                        "name": "Test Product",
-                    },
-                    "unit_amount": 1000,
+                    "product_data": {"name": "Test Product"},
+                    "unit_amount": 1000,  # $10
                 },
                 "quantity": 1,
             }],
@@ -42,4 +53,6 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    # ✅ Use $PORT for Render deployment
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
