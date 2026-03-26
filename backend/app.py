@@ -4,8 +4,8 @@ from flask_cors import CORS
 import os
 
 app = Flask(__name__)
-CORS(app)
 
+CORS(app, origins=["https://strip-test.onrender.com"])
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 YOUR_DOMAIN = os.getenv("DOMAIN")  # 👈 important
