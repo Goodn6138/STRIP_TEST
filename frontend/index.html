@@ -10,37 +10,57 @@
   <button id="checkout-button">Pay</button>
 
   <script>
-    // ✅ Use your REAL public key from Stripe dashboard
-    const stripe = Stripe("pk_test_51SD3UEEQpGz4ZZzjDDoF3mRSySCy05xOCClulGiaJaDUOHEQX7n54u6V0jqOhPBB7I0yTvRbybXKZmvJd70LIhIA00UUB8Pcvv");
-
-    // ✅ Automatically detect backend URL (works on Render)
+    // ✅ Replace with your frontend's backend URL
     const BACKEND_URL = "https://goober-ko72.onrender.com";
 
-    document.getElementById("checkout-button").addEventListener("click", async () => {
+    let stripe;
+
+    // 🔹 Fetch the public key from backend
+    async function initStripe() {
       try {
-        const response = await fetch(`${BACKEND_URL}/create-checkout-session`, {
+        const res = await fetch(`${BACKEND_URL}/config`);
+        const data = await res.json();
+
+        if (!data.publicKey) {
+          throw new Error("No public key returned");
+        }
+
+        stripe = Stripe(data.publicKey);
+      } catch (err) {
+        console.error("Failed to initialize Stripe:", err);
+        alert("Stripe failed to initialize. Check console.");
+      }
+    }
+
+    initStripe();
+
+    // 🔹 Handle button click
+    document.getElementById("checkout-button").addEventListener("click", async () => {
+      if (!stripe) return alert("Stripe not initialized");
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/create-checkout-session`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
           }
         });
 
-        const session = await response.json();
+        const session = await res.json();
 
         if (!session.id) {
           throw new Error("No session ID returned");
         }
 
-        const result = await stripe.redirectToCheckout({
-          sessionId: session.id,
-        });
+        // Redirect to Stripe Checkout
+        const result = await stripe.redirectToCheckout({ sessionId: session.id });
 
         if (result.error) {
           alert(result.error.message);
         }
 
       } catch (err) {
-        console.error(err);
+        console.error("Checkout failed:", err);
         alert("Payment failed. Check console.");
       }
     });
